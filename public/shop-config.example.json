@@ -1,0 +1,8 @@
+{
+  "shopName": "Madhu’s Crochet",
+  "currency": "INR",
+  "currencyLocale": "en-IN",
+  "supabaseUrl": "",
+  "supabaseAnonKey": "",
+  "demoMode": true
+}
