@@ -1,0 +1,15 @@
+node_modules/
+dist/
+out-tsc/
+.angular/
+.npm-cache/
+playwright-report/
+test-results/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+
+public/shop-config.json
+.env.local
