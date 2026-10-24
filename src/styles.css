@@ -1,0 +1,15 @@
+@import '@fontsource-variable/dm-sans/index.css';
+@import '@fontsource-variable/manrope/index.css';
+
+:root { color-scheme: light; font-family: 'DM Sans Variable', 'Segoe UI', sans-serif; color: #352a38; background: #fffdfa; font-synthesis: none; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; }
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: default; }
+button, a, textarea, input, select { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #bb8b68; outline-offset: 4px; }
+svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+::selection { background: #ecd8e5; color: #56334a; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
