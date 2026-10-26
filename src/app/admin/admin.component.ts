@@ -63,13 +63,14 @@ export class AdminComponent {
   readonly visibleOrders = computed(() => {
     const query = this.orderSearch().trim().toLowerCase();
     return this.shop.orders().filter(order =>
+      order.paymentStatus === 'received' &&
       (this.statusFilter() === 'all' || order.status === this.statusFilter()) &&
       (!query || `${order.orderNumber} ${order.customer.name} ${order.customer.phone}`.toLowerCase().includes(query))
     );
   });
   readonly selectedOrder = computed(() => this.selectedOrderId() ? this.shop.orders().find(order => order.id === this.selectedOrderId()) ?? this.selectedOrderSnapshot() : null);
   readonly activeProducts = computed(() => this.shop.products().filter(product => product.available && product.stock > 0).length);
-  readonly openOrders = computed(() => this.shop.orders().filter(order => !['delivered', 'cancelled', 'refunded', 'returned'].includes(order.status)).length);
+  readonly openOrders = computed(() => this.shop.orders().filter(order => order.paymentStatus === 'received' && !['delivered', 'cancelled', 'refunded', 'returned'].includes(order.status)).length);
   readonly receivedTotal = computed(() => this.shop.orders().filter(order => order.paymentStatus === 'received').reduce((sum, order) => sum + order.total, 0));
 
   async ngOnInit(): Promise<void> {
