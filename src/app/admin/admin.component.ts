@@ -290,7 +290,7 @@ export class AdminComponent {
   }
 
   statusLabel(value: string): string {
-    return value === 'returned' ? 'Item received back (undelivered)' : value === 'refunded' ? 'Refunded' : value === 'new' ? 'New order' : value === 'confirmed' ? 'Confirmed / Being made' : value === 'making' ? 'Confirmed / Being made' : value === 'received' ? 'Received' : value.charAt(0).toUpperCase() + value.slice(1);
+    return value === 'returned' ? 'Item received back (undelivered)' : value === 'refunded' ? 'Refunded' : value === 'new' ? 'New order' : value === 'confirmed' ? 'Confirmed and Being Made' : value === 'making' ? 'Confirmed and Being Made' : value === 'received' ? 'Received' : value.charAt(0).toUpperCase() + value.slice(1);
   }
 
   private errorText(error: unknown, fallback: string): string {
