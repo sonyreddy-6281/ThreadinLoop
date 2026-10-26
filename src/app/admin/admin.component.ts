@@ -55,7 +55,7 @@ export class AdminComponent {
     featured: [false],
   });
 
-  readonly statuses: OrderStatus[] = ['new', 'confirmed', 'making', 'shipped', 'delivered', 'cancelled', 'refunded', 'returned'];
+  readonly statuses: OrderStatus[] = ['new', 'confirmed', 'shipped', 'refunded', 'returned'];
   readonly visibleProducts = computed(() => {
     const query = this.productSearch().trim().toLowerCase();
     return this.shop.products().filter(product => !query || `${product.name} ${product.category}`.toLowerCase().includes(query));
@@ -289,7 +289,7 @@ export class AdminComponent {
   }
 
   statusLabel(value: string): string {
-    return value === 'returned' ? 'Item received back (undelivered)' : value === 'refunded' ? 'Refunded' : value === 'new' ? 'New order' : value === 'making' ? 'Being made' : value === 'received' ? 'Received' : value.charAt(0).toUpperCase() + value.slice(1);
+    return value === 'returned' ? 'Item received back (undelivered)' : value === 'refunded' ? 'Refunded' : value === 'new' ? 'New order' : value === 'confirmed' ? 'Confirmed / Being made' : value === 'making' ? 'Confirmed / Being made' : value === 'received' ? 'Received' : value.charAt(0).toUpperCase() + value.slice(1);
   }
 
   private errorText(error: unknown, fallback: string): string {
