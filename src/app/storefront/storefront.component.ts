@@ -114,7 +114,8 @@ export class StorefrontComponent implements OnInit, OnDestroy {
           complete = true;
           try {
             const verified = await this.paymentApi('razorpay-verify', payment);
-            resolve({ paid: verified.verified === true, orderNumber: verified.orderNumber });
+            if (verified.verified !== true) throw new Error('Payment capture is still pending. Do not pay again until the seller confirms your transaction.');
+            resolve({ paid: true, orderNumber: verified.orderNumber });
           } catch (error) { reject(error); }
         },
         modal: { ondismiss: () => { if (!complete) { complete = true; resolve({ paid: false }); } } }
