@@ -257,14 +257,15 @@ export class ShopService {
       }
       const fingerprint = JSON.stringify([clean, cart]);
       if (this.pendingCheckout?.fingerprint !== fingerprint) this.pendingCheckout = { fingerprint, requestId: crypto.randomUUID() };
-      const { data, error } = await this.requireClient().rpc('create_order', { p_customer: clean, p_cart: cart.map(line => ({ product_id: line.productId, quantity: line.quantity })), p_request_id: this.pendingCheckout.requestId });
+      const { data, error } = await this.requireClient().rpc('begin_paid_checkout', {
+        p_customer: clean,
+        p_cart: cart.map(line => ({ product_id: line.productId, quantity: line.quantity })),
+        p_id: this.pendingCheckout.requestId
+      });
       if (error) throw error;
-      const result = Array.isArray(data) ? data[0] : data;
-      if (!result?.id || !result?.order_number) throw new Error('Could not confirm your order. Please retry without changing your cart.');
-      this.pendingCheckout = undefined;
-      // A confirmed order must stay successful if refreshing the catalog fails.
-      await this.refreshProducts().catch(() => undefined);
-      return { id: result.id, orderNumber: result.order_number };
+      const attempt = Array.isArray(data) ? data[0] : data;
+      if (!attempt?.id || !attempt?.total_paise) throw new Error('Could not start secure checkout.');
+      return { id: attempt.id, orderNumber: '' };
     });
   }
 
