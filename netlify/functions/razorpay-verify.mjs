@@ -9,7 +9,7 @@ export default async (request) => {
     const [{ data: link }, payment] = await Promise.all([db.from('checkout_attempts').select('id,total_paise').eq('razorpay_order_id', orderId).maybeSingle(), razorpay('payments/' + encodeURIComponent(paymentId), keyId, secret)]);
     if (!link || payment.order_id !== orderId || payment.amount !== link.total_paise || payment.currency !== 'INR') return response(409, { error: 'Payment details did not match the order.' });
     if (payment.status !== 'captured') return response(202, { verified: false, message: 'Payment is awaiting capture. Check your order status with the seller.' });
-    await markCaptured(db, orderId, paymentId);
-    return response(200, { verified: true });
+    const order = await markCaptured(db, orderId, paymentId);
+    return response(200, { verified: true, orderNumber: order.order_number });
   } catch { return response(500, { error: 'Unable to confirm payment now. Do not pay again; contact the shop with your payment reference.' }); }
 };
