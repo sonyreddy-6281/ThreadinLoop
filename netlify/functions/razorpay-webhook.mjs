@@ -13,8 +13,8 @@ export default async (request) => {
     const { db, keyId, secret } = secrets();
     // Recheck authoritative payment data, not just an event body.
     const authoritative = await razorpay('payments/' + encodeURIComponent(payment.id), keyId, secret);
-    const { data: link } = await db.from('razorpay_orders').select('amount_paise').eq('razorpay_order_id', payment.order_id).maybeSingle();
-    if (!link || authoritative.status !== 'captured' || authoritative.order_id !== payment.order_id || authoritative.amount !== link.amount_paise || authoritative.currency !== 'INR') return response(409, { error: 'Payment mismatch' });
+    const { data: link } = await db.from('checkout_attempts').select('total_paise').eq('razorpay_order_id', payment.order_id).maybeSingle();
+    if (!link || authoritative.status !== 'captured' || authoritative.order_id !== payment.order_id || authoritative.amount !== link.total_paise || authoritative.currency !== 'INR') return response(409, { error: 'Payment mismatch' });
     await markCaptured(db, payment.order_id, payment.id);
     return response(200, { ok: true });
   } catch { return response(500, { error: 'Webhook processing failed' }); }
