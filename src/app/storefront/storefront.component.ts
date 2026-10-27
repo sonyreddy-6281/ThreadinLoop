@@ -80,8 +80,8 @@ export class StorefrontComponent implements OnInit, OnDestroy {
     return data;
   }
 
-  private async launchRazorpay(orderId: string): Promise<boolean> {
-    const config = await this.paymentApi('razorpay-create', { orderId });
+  private async launchRazorpay(attemptId: string): Promise<{ paid: boolean; orderNumber?: string }> {
+    const config = await this.paymentApi('razorpay-create', { attemptId });
     if (!window.document.getElementById('razorpay-checkout-script')) {
       const script = document.createElement('script');
       script.id = 'razorpay-checkout-script';
@@ -102,7 +102,7 @@ export class StorefrontComponent implements OnInit, OnDestroy {
       deliveryDialog.close();
       this.unlockScroll();
     }
-    return new Promise<boolean>((resolve, reject) => {
+    return new Promise<{ paid: boolean; orderNumber?: string }>((resolve, reject) => {
       let complete = false;
       const checkout = new Razorpay({
         key: config.keyId, amount: config.amount, currency: 'INR', order_id: config.razorpayOrderId,
@@ -114,10 +114,10 @@ export class StorefrontComponent implements OnInit, OnDestroy {
           complete = true;
           try {
             const verified = await this.paymentApi('razorpay-verify', payment);
-            resolve(verified.verified === true);
+            resolve({ paid: verified.verified === true, orderNumber: verified.orderNumber });
           } catch (error) { reject(error); }
         },
-        modal: { ondismiss: () => { if (!complete) { complete = true; resolve(false); } } }
+        modal: { ondismiss: () => { if (!complete) { complete = true; resolve({ paid: false }); } } }
       });
       checkout.on('payment.failed', () => { if (!complete) { complete = true; resolve(false); } });
       checkout.open();
@@ -135,9 +135,12 @@ export class StorefrontComponent implements OnInit, OnDestroy {
     let savedOrder: { id: string; orderNumber: string } | undefined;
     try {
       savedOrder = await this.shop.placeOrder({ ...this.customer }, this.cart.lines().map(line => ({ ...line })));
-      this.orderNumber.set(savedOrder.orderNumber);
       let paid = false;
-      if (!this.shop.demoMode()) paid = await this.launchRazorpay(savedOrder.id);
+      if (!this.shop.demoMode()) {
+        const result = await this.launchRazorpay(savedOrder.id);
+        paid = result.paid;
+        if (result.orderNumber) this.orderNumber.set(result.orderNumber);
+      } else this.orderNumber.set(savedOrder.orderNumber);
       this.paymentNotice.set(this.shop.demoMode() ? 'Preview only. No real payment was collected.' : paid
         ? 'Your payment has been verified. Thank you!'
         : 'Payment was not completed. Your checkout is not confirmed.');
