@@ -106,7 +106,7 @@ export class StorefrontComponent implements OnInit, OnDestroy {
       let complete = false;
       const checkout = new Razorpay({
         key: config.keyId, amount: config.amount, currency: 'INR', order_id: config.razorpayOrderId,
-        name: this.shop.config().shopName, description: 'Crochet order ' + config.orderNumber,
+        name: this.shop.config().shopName, description: 'Thread in Loops secure checkout',
         prefill: { name: this.customer.name, email: this.customer.email, contact: this.customer.phone },
         theme: { color: '#986b77' },
         handler: async (payment: any) => {
@@ -119,7 +119,7 @@ export class StorefrontComponent implements OnInit, OnDestroy {
         },
         modal: { ondismiss: () => { if (!complete) { complete = true; resolve({ paid: false }); } } }
       });
-      checkout.on('payment.failed', () => { if (!complete) { complete = true; resolve(false); } });
+      checkout.on('payment.failed', () => { if (!complete) { complete = true; resolve({ paid: false }); } });
       checkout.open();
     });
   }
