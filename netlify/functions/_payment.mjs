@@ -26,15 +26,11 @@ export function validHmac(message, signature, secret) {
   const expected = createHmac('sha256', secret).update(message).digest();
   return timingSafeEqual(actual, expected);
 }
-export async function markCaptured(db, gatewayOrderId, paymentId) {
-  const { data: attempt, error } = await db.from('razorpay_orders').select('shop_order_id,amount_paise,razorpay_payment_id').eq('razorpay_order_id', gatewayOrderId).maybeSingle();
-  if (error || !attempt) throw new Error('Payment attempt was not found.');
-  if (attempt.razorpay_payment_id && attempt.razorpay_payment_id !== paymentId) throw new Error('Payment reference conflicts with an existing payment.');
-  // Conditional update keeps retries idempotent and rejects remapping a gateway order to another payment.
-  const { error: linkError } = await db.from('razorpay_orders').update({ razorpay_payment_id: paymentId, captured_at: new Date().toISOString() }).eq('razorpay_order_id', gatewayOrderId).or('razorpay_payment_id.is.null,razorpay_payment_id.eq.' + paymentId);
-  if (linkError) throw linkError;
-  const { error: paidError } = await db.from('orders').update({ payment_status: 'received' }).eq('id', attempt.shop_order_id).eq('total_paise', attempt.amount_paise);
-  if (paidError) throw paidError;
-  return attempt.shop_order_id;
+export async function markCaptured(db,gatewayOrderId,paymentId) {
+ const {data,error}=await db.rpc('finalize_paid_checkout',{p_gateway_order:gatewayOrderId,p_payment:paymentId});
+ if(error)throw error;
+ const row=Array.isArray(data)?data[0]:data;
+ if(!row?.order_id)throw Error('Payment captured but shop order finalization failed');
+ return row;
 }
 export function uuid(value) { return typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value); }
